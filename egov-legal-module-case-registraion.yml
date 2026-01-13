@@ -7,7 +7,7 @@ serviceMaps:
       isTransaction: true
       queryMaps:
 
-        - query: "INSERT INTO eg_lm_case (caseid, tenantid, casetype, casecategory, title, description, department, courttype, courtname, nexthearingdate, workflowid, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (caseid) DO NOTHING;"
+        - query: "INSERT INTO eg_lm_case (caseid, tenantid, casetype, casecategory, title, description, department, courttype, courtname, nexthearingdate, workflowid,status, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?) ON CONFLICT (caseid) DO NOTHING;"
           basePath: case
           jsonMaps:
             - jsonPath: $.case.caseId
@@ -21,6 +21,7 @@ serviceMaps:
             - jsonPath: $.case.courtName
             - jsonPath: $.case.nextHearingDate
             - jsonPath: $.case.workflow.workflowid
+            - jsonPath: $.case.workflow.action
             - jsonPath: $.case.auditDetails.createdBy
             - jsonPath: $.case.auditDetails.createdTime
             - jsonPath: $.case.auditDetails.lastModifiedBy
@@ -77,7 +78,7 @@ serviceMaps:
       isTransaction: true
       queryMaps:
 
-        - query: "INSERT INTO eg_lm_case (caseid, tenantid, casetype, casecategory, title, description, department, courttype, courtname, nexthearingdate, workflowid, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (caseid) DO NOTHING;"
+        - query: "INSERT INTO eg_lm_case (caseid, tenantid, casetype, casecategory, title, description, department, courttype, courtname, nexthearingdate, workflowid,status, createdby, createdtime, lastmodifiedby, lastmodifiedtime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?) ON CONFLICT (caseid) DO NOTHING;"
           basePath: case
           jsonMaps:
             - jsonPath: $.case.caseId
@@ -91,6 +92,7 @@ serviceMaps:
             - jsonPath: $.case.courtName
             - jsonPath: $.case.nextHearingDate
             - jsonPath: $.case.workflow.workflowid
+            - jsonPath: $.case.workflow.action
             - jsonPath: $.case.auditDetails.createdBy
             - jsonPath: $.case.auditDetails.createdTime
             - jsonPath: $.case.auditDetails.lastModifiedBy
@@ -166,4 +168,3 @@ serviceMaps:
             - jsonPath: $.case.auditDetails.createdTime
             - jsonPath: $.case.auditDetails.lastModifiedBy
             - jsonPath: $.case.auditDetails.lastModifiedTime
-

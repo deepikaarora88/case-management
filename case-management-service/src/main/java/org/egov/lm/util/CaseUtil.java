@@ -34,7 +34,11 @@ public ProcessInstanceRequest initiateCaseWorkFlow(CaseRequest request) {
 	            wf.setTenantId(legalCase.getTenantId());
 	            wf.setBusinessService(configs.getCreateLMWfName());
 	            wf.setModuleName(configs.getLegalModuleName());
-	            wf.setAction(CaseAction.INITIATE.getValue());
+	            if(wf.getAction()==null || wf.getAction().isEmpty()) {
+	            	wf.setAction(CaseAction.INITIATE.getValue());
+	            }else {
+	            	wf.setAction(wf.getAction());
+	            }
 
 	            legalCase.setWorkflow(wf);
 
