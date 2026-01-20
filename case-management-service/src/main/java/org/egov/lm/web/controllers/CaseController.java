@@ -10,6 +10,7 @@ import org.egov.lm.models.Case;
 import org.egov.lm.models.CaseCriteria;
 import org.egov.lm.service.CaseService;
 import org.egov.lm.util.ResponseInfoFactory;
+import org.egov.lm.validator.CaseValidator;
 import org.egov.lm.web.contracts.CaseRequest;
 import org.egov.lm.web.contracts.CaseResponse;
 import org.egov.lm.web.contracts.RequestInfoWrapper;
@@ -31,6 +32,9 @@ public class CaseController {
 
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
+	
+	@Autowired
+	private CaseValidator caseValidator;
 
 
 	@PostMapping("/_create")
@@ -62,7 +66,7 @@ public class CaseController {
 	public ResponseEntity<CaseResponse> search(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 			@Valid @ModelAttribute CaseCriteria caseCriteria) {
 		
-//		propertyValidator.validatePropertyCriteria(caseCriteria, requestInfoWrapper.getRequestInfo());
+		caseValidator.valildateCaseCriteria(caseCriteria,requestInfoWrapper.getRequestInfo());
 		List<Case> cases = caseService.searchCases(caseCriteria,requestInfoWrapper.getRequestInfo());
 		CaseResponse response = CaseResponse.builder().cases(cases).responseInfo(
 				responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))

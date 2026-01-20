@@ -56,6 +56,7 @@ public class CaseRowMapper implements ResultSetExtractor<List<Case>> {
     private Case buildCase(ResultSet rs) {
         try {
             return Case.builder()
+            		.id(rs.getString("id"))
                     .caseId(rs.getString("caseid"))
                     .tenantId(rs.getString("tenantid"))
                     .caseType(rs.getString("casetype"))
@@ -70,7 +71,6 @@ public class CaseRowMapper implements ResultSetExtractor<List<Case>> {
                     .additionalDetails(readJson(rs, "additionaldetails"))
                     .auditDetails(buildAudit(rs))
                     .judgement(buildJudgement(rs))
-                
                     .build();
         } catch (SQLException e) {
             throw new CustomException("CASE_MAPPING_ERROR", e.getMessage());
@@ -83,43 +83,45 @@ public class CaseRowMapper implements ResultSetExtractor<List<Case>> {
 
         Advocate advocate = Advocate.builder()
                 .advocateId(advocateId)
-                .name(rs.getString("advocate_name"))
-                .role(rs.getString("advocate_role"))
+                .name(rs.getString("name"))
+                .email(rs.getString("email"))
+                .mobileNumber(rs.getString("mobilenumber"))
+                .role(rs.getString("role"))
                 .build();
 
         agg.addAdvocate(advocate);
     }
 
     private void addPetitioner(ResultSet rs, CaseAggregate agg) throws SQLException {
-        String petitionerId = rs.getString("petitioner_id");
+        String petitionerId = rs.getString("petitionerid");
         if (petitionerId == null) return;
 
         Petitioner petitioner = Petitioner.builder()
                 .petitionerId(petitionerId)
-                .name(rs.getString("petitioner_name"))
-                .mobileNumber(rs.getString("petitioner_mobile"))
-                .email(rs.getString("petitioner_email"))
+                .name(rs.getString("name"))
+                .mobileNumber(rs.getString("mobilenumber"))
+                .email(rs.getString("email"))
                 .build();
 
         agg.addPetitioner(petitioner);
     }
 
     private void addRespondent(ResultSet rs, CaseAggregate agg) throws SQLException {
-        String respondentId = rs.getString("respondent_id");
+        String respondentId = rs.getString("respondentid");
         if (respondentId == null) return;
 
         Respondent respondent = Respondent.builder()
                 .respondentId(respondentId)
-                .name(rs.getString("respondent_name"))
-                .mobileNumber(rs.getString("respondent_mobile"))
-                .email(rs.getString("respondent_email"))
+                .name(rs.getString("name"))
+                .mobileNumber(rs.getString("mobilenumber"))
+                .email(rs.getString("email"))
                 .build();
 
         agg.addRespondent(respondent);
     }
 
     private void addDocument(ResultSet rs, CaseAggregate agg) throws SQLException {
-        String documentId = rs.getString("document_id");
+        String documentId = rs.getString("id");
         if (documentId == null) return;
 
         Document document = Document.builder()

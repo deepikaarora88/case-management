@@ -30,7 +30,9 @@ import lombok.ToString;
 public class Case {
 
 	/* -------------------- Mandatory Identifiers -------------------- */
-
+	@JsonProperty("id")
+	private String id;
+	
 	@JsonProperty("caseId")
 	private String caseId;
 

@@ -51,8 +51,6 @@ public class CaseService {
 	@Autowired
 	private CaseValidator caseValidator;
 
-	private final SecureRandom random = new SecureRandom();
-
 	public Case fileCase(@Valid CaseRequest caseRequest) {
 	
 		// validate
@@ -77,8 +75,6 @@ public class CaseService {
 
 			throw new CustomException("EG_LM_CASE_AUDIT_ERROR", "Case Ids are null");
 		}
-
-		Set<String> caseIds = criteria.getCaseIds();
 
 		return caseRepository.getAllRegisterdCases(criteria);
 

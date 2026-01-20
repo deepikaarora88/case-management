@@ -36,7 +36,7 @@ public class CaseQueryBuilder {
 	 * FULL DATA FETCH QUERY
 	 */
 	private static final String CASE_DETAILS_QUERY = "SELECT "
-			+ " c.caseid, c.tenantid, c.casetype, c.casecategory, c.title, c.description, "
+			+ "c.id, c.caseid, c.tenantid, c.casetype, c.casecategory, c.title, c.description, "
 			+ " c.department, c.courttype, c.courtname, c.nexthearingdate, c.status, "
 			+ " c.createdby, c.createdtime, c.lastmodifiedby, c.lastmodifiedtime, c.additionaldetails, " +
 
