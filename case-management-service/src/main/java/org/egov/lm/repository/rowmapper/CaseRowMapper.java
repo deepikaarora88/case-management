@@ -70,6 +70,7 @@ public class CaseRowMapper implements ResultSetExtractor<List<Case>> {
                     .additionalDetails(readJson(rs, "additionaldetails"))
                     .auditDetails(buildAudit(rs))
                     .judgement(buildJudgement(rs))
+                
                     .build();
         } catch (SQLException e) {
             throw new CustomException("CASE_MAPPING_ERROR", e.getMessage());
@@ -97,6 +98,7 @@ public class CaseRowMapper implements ResultSetExtractor<List<Case>> {
                 .petitionerId(petitionerId)
                 .name(rs.getString("petitioner_name"))
                 .mobileNumber(rs.getString("petitioner_mobile"))
+                .email(rs.getString("petitioner_email"))
                 .build();
 
         agg.addPetitioner(petitioner);
@@ -110,6 +112,7 @@ public class CaseRowMapper implements ResultSetExtractor<List<Case>> {
                 .respondentId(respondentId)
                 .name(rs.getString("respondent_name"))
                 .mobileNumber(rs.getString("respondent_mobile"))
+                .email(rs.getString("respondent_email"))
                 .build();
 
         agg.addRespondent(respondent);

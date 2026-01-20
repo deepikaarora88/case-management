@@ -44,9 +44,9 @@ public class CaseQueryBuilder {
 
 			" j.judgementid AS judgementid, " + " j.remark AS judgement_remark, " + " j.orderdetail AS orderdetail, " +
 
-			" pet.petitionerid AS petitioner_id, pet.name AS petitioner_name, pet.mobilenumber AS petitioner_mobile, " +
+			" pet.petitionerid AS petitioner_id, pet.name AS petitioner_name, pet.mobilenumber AS petitioner_mobile,pet.email as petitioner_email, " +
 
-			" res.respondentid AS respondent_id, res.name AS respondent_name, res.mobilenumber AS respondent_mobile, " +
+			" res.respondentid AS respondent_id, res.name AS respondent_name, res.mobilenumber AS respondent_mobile, res.email as respondent_email," +
 
 			" doc.id AS document_id, doc.documenttype, doc.filestoreid, doc.documentuid " +
 
