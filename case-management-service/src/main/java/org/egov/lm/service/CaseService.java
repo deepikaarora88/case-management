@@ -81,9 +81,6 @@ public class CaseService {
 		enrichmentService.enrichUpdateCase(caseRequest);
 		if (caseConfiguration.getIsWorkflowEnabled()) {
 			state = wfService.updateCaseWorkflow(caseRequest);
-			if (state != null && state.getState() != null) {
-				caseRequest.getCases().setStatus(Status.valueOf(state.getState()));
-			}
     	}
 
 		producer.push(caseConfiguration.getUpdateCaseTopic(), caseRequest);
