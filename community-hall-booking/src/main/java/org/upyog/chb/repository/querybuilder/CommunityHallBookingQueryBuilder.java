@@ -67,13 +67,26 @@ public class CommunityHallBookingQueryBuilder {
 	private final String paginationWrapper = "SELECT * FROM " + "(SELECT *, DENSE_RANK() OVER (ORDER BY application_date DESC) offset_ FROM " + "({})"
 			+ " result) result_offset " + "WHERE offset_ > ? AND offset_ <= ?";
 
-	private static final String COMMUNITY_HALL_SLOTS_AVAIALABILITY_QUERY = "SELECT ecbd.tenant_id, ecbd.community_hall_code, ecsd.capacity, ecsd.hall_code, ecsd.status,ecsd.booking_date \n"
-			+ "	FROM eg_chb_booking_detail ecbd\n"
-			+ "	join eg_chb_slot_detail ecsd on ecbd.booking_id = ecsd.booking_id"
-			+ "	LEFT JOIN eg_chb_payment_timer ecpt ON ecbd.booking_id = ecpt.booking_id\n"
-			+ " where  ecbd.tenant_id= ? and ecbd.community_hall_code = ?\n"
-			+ " and ecsd.status in ('BOOKED', 'PENDING_FOR_PAYMENT') and \n"
-			+ "	ecsd.booking_date >= ?::DATE and ecsd.booking_date <=  ?::DATE ";
+	private static final String COMMUNITY_HALL_SLOTS_AVAIALABILITY_QUERY =
+        "SELECT ecbd.tenant_id, " +
+        "ecbd.community_hall_code, " +
+        "ecsd.capacity, " +
+        "ecsd.hall_code, " +
+        "ecsd.status, " +
+        "ecsd.booking_date, " +
+        "ecsd.booking_from_time, " +
+        "ecsd.booking_to_time " +
+        "FROM eg_chb_booking_detail ecbd " +
+        "JOIN eg_chb_slot_detail ecsd " +
+        "ON ecbd.booking_id = ecsd.booking_id " +
+        "LEFT JOIN eg_chb_payment_timer ecpt " +
+        "ON ecbd.booking_id = ecpt.booking_id " +
+        "WHERE ecbd.tenant_id = ? " +
+        "AND ecbd.community_hall_code = ? " +
+        "AND ecsd.status IN ('BOOKED','PENDING_FOR_PAYMENT') " +
+        "AND ecsd.booking_date >= ?::DATE " +
+        "AND ecsd.booking_date <= ?::DATE " +
+        "AND ecsd.hall_code = ?";
 		//	+ "	AND ecsd.hall_code in (?)";
 	
 	//private static final String COUNT_WRAPPER = " SELECT COUNT(*) FROM ({INTERNAL_QUERY}) AS count ";
@@ -341,16 +354,17 @@ public class CommunityHallBookingQueryBuilder {
 	}
 
 	public StringBuilder getCommunityHallSlotAvailabilityQuery(CommunityHallSlotSearchCriteria searchCriteria,
-			List<Object> paramsList) {
-		StringBuilder builder = new StringBuilder(COMMUNITY_HALL_SLOTS_AVAIALABILITY_QUERY);
+        	List<Object> paramsList) {
 
-		paramsList.add(searchCriteria.getTenantId());
-		paramsList.add(searchCriteria.getCommunityHallCode());
-//		paramsList.add(SlotStatusEnum.BOOKED.toString());
-		paramsList.add(searchCriteria.getBookingStartDate());
-		paramsList.add(searchCriteria.getBookingEndDate());
+    	StringBuilder builder = new StringBuilder(COMMUNITY_HALL_SLOTS_AVAIALABILITY_QUERY);
 
-		return builder;
-	}
+    	paramsList.add(searchCriteria.getTenantId());
+    	paramsList.add(searchCriteria.getCommunityHallCode());
+    	paramsList.add(searchCriteria.getBookingStartDate());
+    	paramsList.add(searchCriteria.getBookingEndDate());
+    	paramsList.add(searchCriteria.getHallCode());  
+
+    	return builder;
+}
 
 }

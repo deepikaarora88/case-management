@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
@@ -119,7 +119,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 		enrichmentService.enrichCreateBookingRequest(communityHallsBookingRequest);
 		
 		//ENcrypt PII data of applicant
-		//encryptionService.encryptObject(communityHallsBookingRequest);
+		encryptionService.encryptObject(communityHallsBookingRequest);
 
 		/**
 		 * Workflow will come into picture once hall location changes or booking is
@@ -167,7 +167,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 			CommunityHallBookingRequest bookingRequest = CommunityHallBookingRequest.builder()
 					.hallsBookingApplication(communityHallBookingDetail).requestInfo(info).build();
 
-			//communityHallBookingDetail = encryptionService.encryptObject(bookingRequest);
+			communityHallBookingDetail = encryptionService.encryptObject(bookingRequest);
 
 			bookingSearchCriteria
 					.setMobileNumber(communityHallBookingDetail.getApplicantDetail().getApplicantMobileNo());
@@ -180,7 +180,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 		if(CollectionUtils.isEmpty(bookingDetails)) {
 			return bookingDetails;
 		}
-//		bookingDetails = encryptionService.decryptObject(bookingDetails, info);
+		bookingDetails = encryptionService.decryptObject(bookingDetails, info);
 		
 		return bookingDetails;
 	}
@@ -360,10 +360,11 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 	timerDetails.forEach(detail -> {
 		// Create a Slot availability object for comparison
 		CommunityHallSlotAvailabilityDetail availabilityDetail = CommunityHallSlotAvailabilityDetail.builder()
-				.communityHallCode(detail.getCommunityHallcode()).hallCode(detail.getHallcode())
+				.communityHallCode(detail.getCommunityHallcode())
+				.hallCode(detail.getHallcode())
 				.bookingDate(CommunityHallBookingUtil.parseLocalDateToString(detail.getBookingDate(), CommunityHallBookingConstants.DATE_FORMAT))
-				.tenantId(detail.getTenantId()).build();
-
+				.tenantId(detail.getTenantId()).slotStaus(BookingStatusEnum.AVAILABLE.toString()).build();
+				
 		// Check if the timerDetails set contains this booking and if it's created by
 		// the current user
 		// Update the slot status based on the comparison
@@ -371,12 +372,12 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 			log.info("Booking created by user id {} and booking id {} ", criteria.getBookingId(),
 					info.getUserInfo().getUuid());
 			CommunityHallSlotAvailabilityDetail slotAvailabilityDetail = slotDetailsMap.get(availabilityDetail);
-			log.info("Slot Availability detail ::: " + slotAvailabilityDetail.toString());
+
 			boolean isCreatedByCurrentUser = detail.getCreatedBy().equals(info.getUserInfo().getUuid());
 			boolean existingBookingIdCheck = detail.getBookingId().equals(criteria.getBookingId());
 
 			if (isCreatedByCurrentUser && existingBookingIdCheck) {
-				log.info("inside booking created by me with same booking id ");
+
 				slotAvailabilityDetail.setSlotStaus(BookingStatusEnum.AVAILABLE.toString());
 			} else {
 				slotAvailabilityDetail.setSlotStaus(BookingStatusEnum.BOOKED.toString());
@@ -417,15 +418,20 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 					"Booking is not allowed for this no of days.");
 		}
 
-		totalDates.stream().forEach(date -> {
+		totalDates.forEach(date -> {
 			List<String> hallCodes = new ArrayList<>();
 			if (StringUtils.isNotBlank(criteria.getHallCode())) {
 				hallCodes.add(criteria.getHallCode());
 			} else {
 				hallCodes.addAll(criteria.getHallCodes());
 			}
-			hallCodes.stream().forEach(data -> {
-				availabiltityDetailsList.add(createCommunityHallSlotAvailabiltityDetail(criteria, date, data));
+			hallCodes.forEach(hallCode -> {
+
+				// Morning shift
+				availabiltityDetailsList.add(createCommunityHallSlotAvailabiltityDetail(criteria, date, hallCode, "06:00", "13:59"));
+				// Evening shift
+				availabiltityDetailsList.add(createCommunityHallSlotAvailabiltityDetail(criteria, date, hallCode, "14:00", "21:59"));
+
 			});
 		});
 
@@ -438,16 +444,28 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 		
 		return availabiltityDetailsList;
 	}
-
 	private CommunityHallSlotAvailabilityDetail createCommunityHallSlotAvailabiltityDetail(
-			CommunityHallSlotSearchCriteria criteria, LocalDate date, String hallCode) {
-		CommunityHallSlotAvailabilityDetail availabiltityDetail = CommunityHallSlotAvailabilityDetail.builder()
-				.communityHallCode(criteria.getCommunityHallCode()).hallCode(hallCode)
-			//Setting slot status available for every hall and hall code
-				.slotStaus(BookingStatusEnum.AVAILABLE.toString()).tenantId(criteria.getTenantId())
-				.bookingDate(CommunityHallBookingUtil.parseLocalDateToString(date, "dd-MM-yyyy")).build();
-		return availabiltityDetail;
-	}
+        CommunityHallSlotSearchCriteria criteria,
+        LocalDate date,
+        String hallCode,
+        String fromTime,
+        String toTime) {
 
+    CommunityHallSlotAvailabilityDetail availabilityDetail =
+            CommunityHallSlotAvailabilityDetail.builder()
+            .communityHallCode(criteria.getCommunityHallCode())
+            .hallCode(hallCode)
+            .bookingDate(
+                    CommunityHallBookingUtil.parseLocalDateToString(
+                            date,
+                            CommunityHallBookingConstants.DATE_FORMAT))
+            .fromTime(fromTime)
+            .toTime(toTime)
+            .tenantId(criteria.getTenantId())
+            .slotStaus(BookingStatusEnum.AVAILABLE.toString())
+            .build();
+
+    return availabilityDetail;
+}
 
 }
