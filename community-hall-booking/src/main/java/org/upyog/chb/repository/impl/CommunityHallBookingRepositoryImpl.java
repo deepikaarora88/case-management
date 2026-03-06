@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
@@ -44,30 +44,30 @@ import digit.models.coremodels.PaymentDetail;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * This class implements the CommunityHallBookingRepository interface and provides
- * the database interaction logic for the Community Hall Booking module.
+ * This class implements the CommunityHallBookingRepository interface and
+ * provides the database interaction logic for the Community Hall Booking
+ * module.
  * 
- * Purpose:
- * - To handle all database operations related to community hall bookings, such as
- *   creating, updating, retrieving, and deleting booking records.
+ * Purpose: - To handle all database operations related to community hall
+ * bookings, such as creating, updating, retrieving, and deleting booking
+ * records.
  * 
- * Dependencies:
- * - Producer: Used for publishing events to Kafka topics.
- * - CommunityHallBookingConfiguration: Provides configuration properties for the module.
- * - CommunityHallBookingQueryBuilder: Constructs SQL queries for database operations.
- * - CommunityHallBookingRowmapper: Maps result sets to CommunityHallBookingDetail objects.
- * - BookingSlotDetailRowmapper: Maps result sets to slot detail objects.
- * - DocumentDetailsRowMapper: Maps result sets to document detail objects.
- * - JdbcTemplate: Executes SQL queries and updates against the database.
- * - CommunityHallSlotAvailabilityRowMapper: Maps result sets to slot availability objects.
+ * Dependencies: - Producer: Used for publishing events to Kafka topics. -
+ * CommunityHallBookingConfiguration: Provides configuration properties for the
+ * module. - CommunityHallBookingQueryBuilder: Constructs SQL queries for
+ * database operations. - CommunityHallBookingRowmapper: Maps result sets to
+ * CommunityHallBookingDetail objects. - BookingSlotDetailRowmapper: Maps result
+ * sets to slot detail objects. - DocumentDetailsRowMapper: Maps result sets to
+ * document detail objects. - JdbcTemplate: Executes SQL queries and updates
+ * against the database. - CommunityHallSlotAvailabilityRowMapper: Maps result
+ * sets to slot availability objects.
  * 
- * Features:
- * - Uses Spring's @Repository annotation to mark this class as a data access component.
- * - Uses Lombok's @Slf4j annotation for logging database operations and errors.
+ * Features: - Uses Spring's @Repository annotation to mark this class as a data
+ * access component. - Uses Lombok's @Slf4j annotation for logging database
+ * operations and errors.
  * 
- * Usage:
- * - This class is automatically managed by Spring and injected wherever the
- *   CommunityHallBookingRepository interface is required.
+ * Usage: - This class is automatically managed by Spring and injected wherever
+ * the CommunityHallBookingRepository interface is required.
  */
 
 @Repository
@@ -181,39 +181,20 @@ public class CommunityHallBookingRepositoryImpl implements CommunityHallBookingR
 	@Override
 	public List<CommunityHallSlotAvailabilityDetail> getCommunityHallSlotAvailability(
 			CommunityHallSlotSearchCriteria criteria) {
+
 		List<Object> paramsList = new ArrayList<>();
 
 		StringBuilder query = queryBuilder.getCommunityHallSlotAvailabilityQuery(criteria, paramsList);
 
-		String hallCodeQuery = " AND ecsd.hall_code ";
+		log.info("getCommunityHallSlotAvailability : Final query: {}", query);
+		log.info("paramsList : {}", paramsList);
 
-		if (StringUtils.isNotBlank(criteria.getHallCode())) {
-			query.append(hallCodeQuery).append(" = ? ");
-			paramsList.add(criteria.getHallCode());
-		} else {
-			List<String> hallCodes = criteria.getHallCodes();
-			query.append(hallCodeQuery).append(" IN ( ");
-			int i = 0;
-			while (i < hallCodes.size()) {
-				query.append(" ? ");
-				if (i != hallCodes.size() - 1) {
-					query.append(" , ");
-				}
-
-				paramsList.add(hallCodes.get(i));
-
-				i++;
-			}
-			query.append(" ) ");
-		}
-
-		log.info("getBookingDetails : Final query: " + query);
-		log.info("paramsList : " + paramsList);
-		List<CommunityHallSlotAvailabilityDetail> availabiltityDetails = jdbcTemplate.query(query.toString(),
+		List<CommunityHallSlotAvailabilityDetail> availabilityDetails = jdbcTemplate.query(query.toString(),
 				paramsList.toArray(), availabilityRowMapper);
 
-		log.info("Fetched slot availabilty details : " + availabiltityDetails);
-		return availabiltityDetails;
+		log.info("Fetched slot availability details : {}", availabilityDetails);
+
+		return availabilityDetails;
 	}
 
 	@Override
@@ -228,10 +209,8 @@ public class CommunityHallBookingRepositoryImpl implements CommunityHallBookingR
 		long lastModifiedTime = CommunityHallBookingUtil.getCurrentTimestamp();
 		String tenantId = criteria.getTenantId();
 
-		// Parse bookingStartDate and bookingEndDate into LocalDate
 		LocalDate startDate = LocalDate.parse(criteria.getBookingStartDate());
 		LocalDate endDate = LocalDate.parse(criteria.getBookingEndDate());
-
 //		// Log the information at the beginning of the method
 //		log.info("Executing Insert Query with the following details: ");
 //		log.info("Booking ID: {}", bookingId);
@@ -272,7 +251,7 @@ public class CommunityHallBookingRepositoryImpl implements CommunityHallBookingR
 		}
 
 	}
-	
+
 //	@Override
 //	public void deleteBookingTimer(String bookingId, boolean updateBookingStatus) {
 //		log.info("Deleting booking timer query : {} booking id : {} ", CommunityHallBookingQueryBuilder.PAYMENT_TIMER_DELETE_FOR_BOOKING_ID_QUERY, bookingId);
@@ -283,7 +262,6 @@ public class CommunityHallBookingRepositoryImpl implements CommunityHallBookingR
 //		}
 //
 //	}
-	
 	@Override
 	public void deleteBookingTimer(String bookingIds, boolean updateBookingStatus) {
 		if (bookingIds == null || bookingIds.isEmpty()) {
@@ -322,8 +300,9 @@ public class CommunityHallBookingRepositoryImpl implements CommunityHallBookingR
 
 		timerValueInMilleconds = timerValueInMilleconds * 60 * 1000;
 
-		List<BookingPaymentTimerDetails> bookingPaymentTimerDetails = jdbcTemplate.query(CommunityHallBookingQueryBuilder.PAYMENT_TIMER_SELECT_EXPIRED_QUERY, new Object[]{currentTimeMillis,
-				timerValueInMilleconds, "ACTIVE"},
+		List<BookingPaymentTimerDetails> bookingPaymentTimerDetails = jdbcTemplate.query(
+				CommunityHallBookingQueryBuilder.PAYMENT_TIMER_SELECT_EXPIRED_QUERY,
+				new Object[] { currentTimeMillis, timerValueInMilleconds, "ACTIVE" },
 				new GenericRowMapper<>(BookingPaymentTimerDetails.class));
 		return bookingPaymentTimerDetails;
 
@@ -331,106 +310,102 @@ public class CommunityHallBookingRepositoryImpl implements CommunityHallBookingR
 
 	@Override
 	public void updateBookingSynchronously(String bookingId, String uuid, PaymentDetail paymentDetail, String status) {
-		
+
 		log.info("updateBookingSynchronously for booking id : {} by uuid : ", bookingId, uuid);
-		
+
 		String lastUpdateBy = uuid;
 		long lastUpdatedTime = CommunityHallBookingUtil.getCurrentTimestamp();
 		String receiptNo = null;
 		long receiptDate = 0l;
-		//Update payment date and receipt no on successful payment when payment detail object is received
+		// Update payment date and receipt no on successful payment when payment detail object is received
 		if (paymentDetail != null) {
-			receiptNo =	paymentDetail.getReceiptNumber();
-			receiptDate=	paymentDetail.getReceiptDate();
+			receiptNo = paymentDetail.getReceiptNumber();
+			receiptDate = paymentDetail.getReceiptDate();
 		}
-		
+
 		log.info("Updating payment status of booking id : {} to status : {}", bookingId, status);
-		
-		if(paymentDetail != null) {
-			jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPDATE_BOOKING_DETAIL_QUERY, status, lastUpdateBy, lastUpdatedTime, receiptNo, receiptDate, bookingId);
+
+		if (paymentDetail != null) {
+			jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPDATE_BOOKING_DETAIL_QUERY, status, lastUpdateBy,
+					lastUpdatedTime, receiptNo, receiptDate, bookingId);
 		} else {
-			jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPDATE_BOOKING_STATUS, status, lastUpdateBy, lastUpdatedTime, bookingId);
+			jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPDATE_BOOKING_STATUS, status, lastUpdateBy,
+					lastUpdatedTime, bookingId);
 		}
-		
-		jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPDATE_BOOKING_SLOT_QUERY, status, lastUpdateBy, lastUpdatedTime, bookingId);
-		
+
+		jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPDATE_BOOKING_SLOT_QUERY, status, lastUpdateBy,
+				lastUpdatedTime, bookingId);
+
 		jdbcTemplate.update(CommunityHallBookingQueryBuilder.INSERT_BOOKING_DETAIL_AUDIT_QUERY, bookingId);
 		jdbcTemplate.update(CommunityHallBookingQueryBuilder.INSERT_SLOT_DETAIL_AUDIT_QUERY, bookingId);
 	}
 
 	@Override
 	public List<BookingPaymentTimerDetails> getBookingTimer(CommunityHallSlotSearchCriteria criteria) {
-		
-		List<BookingPaymentTimerDetails> paymentTimerList = jdbcTemplate.query(CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY, 
-				new Object[]{criteria.getBookingId()},
-				new GenericRowMapper<>(BookingPaymentTimerDetails.class));
-		
-		log.info("Booking payment timer query : {} and parmas : {}", CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY, criteria.getBookingId());
-		
+
+		List<BookingPaymentTimerDetails> paymentTimerList = jdbcTemplate.query(
+				CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY,
+				new Object[] { criteria.getBookingId() }, new GenericRowMapper<>(BookingPaymentTimerDetails.class));
+
+		log.info("Booking payment timer query : {} and parmas : {}",
+				CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY, criteria.getBookingId());
+
 		return paymentTimerList;
 	}
-	
+
 	@Override
 	public List<BookingPaymentTimerDetails> getBookingTimer(List<String> bookingIds) {
-		
+
 		String bookingIdString = String.join(",", bookingIds);
-		
-		List<BookingPaymentTimerDetails> paymentTimerList = jdbcTemplate.query(CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY, 
-				new Object[]{bookingIdString},
-				new GenericRowMapper<>(BookingPaymentTimerDetails.class));
-		
-		log.info("Booking payment timer query : {} and parmas : {}", CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY, bookingIdString);
+
+		List<BookingPaymentTimerDetails> paymentTimerList = jdbcTemplate.query(
+				CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY,
+				new Object[] { bookingIdString }, new GenericRowMapper<>(BookingPaymentTimerDetails.class));
+
+		log.info("Booking payment timer query : {} and parmas : {}",
+				CommunityHallBookingQueryBuilder.GET_BOOKING_PAYMENT_TIMER_VALUE_QUERY, bookingIdString);
 		return paymentTimerList;
 	}
-	
-    /**
-     * Updates the createdTime field for a given booking.
-     */
+
+	/**
+	 * Updates the createdTime field for a given booking.
+	 */
 	@Override
-    public int updateBookingTimer(String bookingId) {
-       return jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPADTE_BOOKING_PAYMENT_TIMER_VALUE_QUERY, "PENDING", bookingId);
-    }
+	public int updateBookingTimer(String bookingId) {
+		return jdbcTemplate.update(CommunityHallBookingQueryBuilder.UPADTE_BOOKING_PAYMENT_TIMER_VALUE_QUERY, "PENDING",
+				bookingId);
+	}
 
 	@Override
 	public List<BookingPaymentTimerDetails> getBookingTimerByCreatedBy(RequestInfo info,
-	        CommunityHallSlotSearchCriteria criteria) {
+			CommunityHallSlotSearchCriteria criteria) {
 
-	    // Parse bookingStartDate and bookingEndDate into SQL-compatible Date objects
-	    Date startDate = Date.valueOf(criteria.getBookingStartDate()); // String to SQL Date
-	    Date endDate = Date.valueOf(criteria.getBookingEndDate());     // String to SQL Date
+		// Parse bookingStartDate and bookingEndDate into SQL-compatible Date objects
+		Date startDate = Date.valueOf(criteria.getBookingStartDate()); // String to SQL Date
+		Date endDate = Date.valueOf(criteria.getBookingEndDate()); // String to SQL Date
 
-	    // Execute query with updated criteria
-	    List<BookingPaymentTimerDetails> timerDetails = jdbcTemplate.query(
-	        CommunityHallBookingQueryBuilder.SELECT_TIMER_QUERY,
-	        new Object[] {
-	            criteria.getTenantId(), 
-	            criteria.getCommunityHallCode(),
-	            criteria.getHallCode(),
-	            startDate,
-	            endDate
-	        },
-	        (rs, rowNum) -> {
-	            BookingPaymentTimerDetails details = new BookingPaymentTimerDetails();
-	            details.setBookingId(rs.getString("booking_id"));
-	            details.setCreatedBy(rs.getString("createdby"));
-	            details.setCreatedTime(rs.getLong("createdtime"));
-	            details.setStatus(rs.getString("status"));
-	            details.setCommunityHallcode(rs.getString("community_hall_code"));
-	            details.setHallcode(rs.getString("hall_code"));
-	            details.setLastModifiedBy(rs.getString("lastmodifiedby"));
-	            details.setLastModifiedTime(rs.getObject("lastmodifiedtime", Long.class));
-	            details.setTenantId(rs.getString("tenant_id"));
-	            java.sql.Date sqlDate = rs.getDate("booking_date");
-	            if (sqlDate != null) {
-	                details.setBookingDate(sqlDate.toLocalDate());
-	            }
-	            return details;
-	        }
-	    );
+		// Execute query with updated criteria
+		List<BookingPaymentTimerDetails> timerDetails = jdbcTemplate
+				.query(CommunityHallBookingQueryBuilder.SELECT_TIMER_QUERY, new Object[] { criteria.getTenantId(),
+						criteria.getCommunityHallCode(), criteria.getHallCode(), startDate, endDate }, (rs, rowNum) -> {
+							BookingPaymentTimerDetails details = new BookingPaymentTimerDetails();
+							details.setBookingId(rs.getString("booking_id"));
+							details.setCreatedBy(rs.getString("createdby"));
+							details.setCreatedTime(rs.getLong("createdtime"));
+							details.setStatus(rs.getString("status"));
+							details.setCommunityHallcode(rs.getString("community_hall_code"));
+							details.setHallcode(rs.getString("hall_code"));
+							details.setLastModifiedBy(rs.getString("lastmodifiedby"));
+							details.setLastModifiedTime(rs.getObject("lastmodifiedtime", Long.class));
+							details.setTenantId(rs.getString("tenant_id"));
+							java.sql.Date sqlDate = rs.getDate("booking_date");
+							if (sqlDate != null) {
+								details.setBookingDate(sqlDate.toLocalDate());
+							}
+							return details;
+						});
 
-	    return timerDetails;
+		return timerDetails;
 	}
 
-
-	
 }
