@@ -55,6 +55,10 @@ public class CommunityHallSlotAvailabilityRowMapper implements ResultSetExtracto
 					.bookingDate(CommunityHallBookingUtil.convertDateFormat(rs.getString("booking_date"), CommunityHallBookingConstants.DATE_FORMAT))
 					.communityHallCode(rs.getString("community_hall_code"))
 					.hallCode(rs.getString("hall_code"))
+					.floorId(rs.getString("floor_id"))        
+					.floorName(rs.getString("floor_name"))    
+					.fromTime(rs.getString("from_time"))      
+					.toTime(rs.getString("to_time"))          
 					.slotStaus(rs.getString("status"))
 					.tenantId(rs.getString("tenant_id"))
 					.build();

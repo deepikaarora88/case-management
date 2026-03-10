@@ -72,6 +72,7 @@ public class CommunityHallBookingQueryBuilder {
         "ecbd.community_hall_code, " +
         "ecsd.capacity, " +
         "ecsd.hall_code, " +
+		"ecsd.floor_code," +
         "ecsd.status, " +
         "ecsd.booking_date, " +
         "ecsd.booking_from_time, " +
@@ -86,7 +87,7 @@ public class CommunityHallBookingQueryBuilder {
         "AND ecsd.status IN ('BOOKED','PENDING_FOR_PAYMENT') " +
         "AND ecsd.booking_date >= ?::DATE " +
         "AND ecsd.booking_date <= ?::DATE " +
-        "AND ecsd.hall_code = ?";
+        "AND ecsd.hall_code = ? ";
 		//	+ "	AND ecsd.hall_code in (?)";
 	
 	//private static final String COUNT_WRAPPER = " SELECT COUNT(*) FROM ({INTERNAL_QUERY}) AS count ";

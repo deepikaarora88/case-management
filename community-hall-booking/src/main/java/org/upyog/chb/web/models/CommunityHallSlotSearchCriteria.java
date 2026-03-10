@@ -31,6 +31,7 @@ public class CommunityHallSlotSearchCriteria {
 	private String hallCode;
 	
 	private List<String> hallCodes;
+	private List<String> floorCodes;
 
 	@NotBlank
 	@ValidDate

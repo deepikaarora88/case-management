@@ -308,6 +308,43 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 		communityHallsBookingRequest.setHallsBookingApplication(bookingDetailDB);
 		
 	}
+	@SuppressWarnings("unchecked")
+	private List<Map<String, Object>> getFloorsFromHall(Object mdmsData, String hallCode) {
+		
+
+	    List<Map<String, Object>> floors = new ArrayList<>();
+
+	    try {
+
+	        Map<String, Object> mdms = (Map<String, Object>) mdmsData;
+
+	        Map<String, Object> mdmsRes =
+	                (Map<String, Object>) mdms.get("MdmsRes");
+
+	        Map<String, Object> chb =
+	                (Map<String, Object>) mdmsRes.get("CHB");
+
+	        List<Map<String, Object>> halls =
+	                (List<Map<String, Object>>) chb.get("HallCode");
+
+	        for (Map<String, Object> hall : halls) {
+
+	            String mdmsHallCode = hall.get("HallCode").toString();
+
+	            if (hallCode.equals(mdmsHallCode)) {
+
+	                floors = (List<Map<String, Object>>) hall.get("floors");
+
+	                return floors;
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        log.error("Error while reading floors from MDMS", e);
+	    }
+
+	    return floors;
+	}
 
 	@Override
 	public CommunityHallSlotAvailabilityResponse getCommunityHallSlotAvailability(
@@ -321,7 +358,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 		log.info("Availabiltity details fetched from DB :" + availabiltityDetails);
 
 		List<CommunityHallSlotAvailabilityDetail> availabiltityDetailsList = convertToCommunityHallAvailabilityResponse(
-				criteria, availabiltityDetails);
+				criteria, availabiltityDetails, info);
 
 		Long timerValue = -1l;
 		availabiltityDetailsList = checkTimerTableForAvailaibility(info, criteria, availabiltityDetailsList);
@@ -398,13 +435,15 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 	 * @return
 	 */
 	private List<CommunityHallSlotAvailabilityDetail> convertToCommunityHallAvailabilityResponse(
-			CommunityHallSlotSearchCriteria criteria, List<CommunityHallSlotAvailabilityDetail> availabiltityDetails) {
+        CommunityHallSlotSearchCriteria criteria,
+        List<CommunityHallSlotAvailabilityDetail> availabiltityDetails,
+        RequestInfo info) {
 
 		List<CommunityHallSlotAvailabilityDetail> availabiltityDetailsList = new ArrayList<CommunityHallSlotAvailabilityDetail>();
 		LocalDate startDate = CommunityHallBookingUtil.parseStringToLocalDate(criteria.getBookingStartDate());
 
 		LocalDate endDate = CommunityHallBookingUtil.parseStringToLocalDate(criteria.getBookingEndDate());
-
+		Object mdmsData = mdmsUtil.mDMSCall(info, criteria.getTenantId());
 		List<LocalDate> totalDates = new ArrayList<>();
 		//Calculating list of dates for booking
 		while (!startDate.isAfter(endDate)) {
@@ -427,12 +466,36 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 			}
 			hallCodes.forEach(hallCode -> {
 
-				// Morning shift
-				availabiltityDetailsList.add(createCommunityHallSlotAvailabiltityDetail(criteria, date, hallCode, "06:00", "13:59"));
-				// Evening shift
-				availabiltityDetailsList.add(createCommunityHallSlotAvailabiltityDetail(criteria, date, hallCode, "14:00", "21:59"));
+    List<Map<String, Object>> floors =
+            getFloorsFromHall(mdmsData, hallCode);
 
-			});
+    floors.forEach(floor -> {
+
+        String floorCode = floor.get("floorId").toString();
+
+        List<Map<String, Object>> timeSlots =
+                (List<Map<String, Object>>) floor.get("timeSlots");
+
+        timeSlots.forEach(slot -> {
+
+            String fromTime = slot.get("from").toString();
+            String toTime = slot.get("to").toString();
+
+            availabiltityDetailsList.add(
+                    createCommunityHallSlotAvailabiltityDetail(
+                            criteria,
+                            date,
+                            hallCode,
+                            floorCode,
+                            fromTime,
+                            toTime
+                    ));
+
+        });
+
+    });
+
+});
 		});
 
 		//Setting hall status to booked if it is already booked by checking in the database entry
@@ -444,10 +507,12 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 		
 		return availabiltityDetailsList;
 	}
+
 	private CommunityHallSlotAvailabilityDetail createCommunityHallSlotAvailabiltityDetail(
         CommunityHallSlotSearchCriteria criteria,
         LocalDate date,
         String hallCode,
+        String floorCode,
         String fromTime,
         String toTime) {
 
@@ -455,6 +520,7 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
             CommunityHallSlotAvailabilityDetail.builder()
             .communityHallCode(criteria.getCommunityHallCode())
             .hallCode(hallCode)
+			.floorId(floorCode)
             .bookingDate(
                     CommunityHallBookingUtil.parseLocalDateToString(
                             date,
