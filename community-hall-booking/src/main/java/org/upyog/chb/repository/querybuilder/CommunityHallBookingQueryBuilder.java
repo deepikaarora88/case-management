@@ -72,7 +72,7 @@ public class CommunityHallBookingQueryBuilder {
         "ecbd.community_hall_code, " +
         "ecsd.capacity, " +
         "ecsd.hall_code, " +
-		"ecsd.floor_code," +
+		"ecsd.floor_id," +
         "ecsd.status, " +
         "ecsd.booking_date, " +
         "ecsd.booking_from_time, " +
