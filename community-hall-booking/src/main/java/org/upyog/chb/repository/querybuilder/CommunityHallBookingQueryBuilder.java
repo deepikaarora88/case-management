@@ -73,6 +73,7 @@ public class CommunityHallBookingQueryBuilder {
         "ecsd.capacity, " +
         "ecsd.hall_code, " +
 		"ecsd.floor_code," +
+		"ecsd.floor_name," +
         "ecsd.status, " +
         "ecsd.booking_date, " +
         "ecsd.booking_from_time, " +
@@ -363,7 +364,7 @@ public class CommunityHallBookingQueryBuilder {
     	paramsList.add(searchCriteria.getCommunityHallCode());
     	paramsList.add(searchCriteria.getBookingStartDate());
     	paramsList.add(searchCriteria.getBookingEndDate());
-    	paramsList.add(searchCriteria.getHallCode());  
+    	paramsList.add(searchCriteria.getHallCode());
 
     	return builder;
 }

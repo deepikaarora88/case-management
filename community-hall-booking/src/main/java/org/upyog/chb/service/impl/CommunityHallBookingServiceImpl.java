@@ -310,45 +310,54 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 	}
 	@SuppressWarnings("unchecked")
 	private List<Map<String, Object>> getFloorsFromHall(Object mdmsData, String hallCode) {
-		
 
-	    List<Map<String, Object>> floors = new ArrayList<>();
+		List<Map<String, Object>> floors = new ArrayList<>();
 
-	    try {
+		try {
 
-	        Map<String, Object> mdms = (Map<String, Object>) mdmsData;
+			Map<String, Object> mdms = (Map<String, Object>) mdmsData;
 
-	        Map<String, Object> mdmsRes =
-	                (Map<String, Object>) mdms.get("MdmsRes");
+			Map<String, Object> mdmsRes =
+					(Map<String, Object>) mdms.get("MdmsRes");
 
-	        Map<String, Object> chb =
-	                (Map<String, Object>) mdmsRes.get("CHB");
+			Map<String, Object> chb =
+					(Map<String, Object>) mdmsRes.get("CHB");
 
-	        List<Map<String, Object>> halls =
-	                (List<Map<String, Object>>) chb.get("HallCode");
+			Object hallCodeObj = chb.get("HallCode");
 
-	        for (Map<String, Object> hall : halls) {
+			if (hallCodeObj instanceof List<?>) {
 
-	            String mdmsHallCode = hall.get("HallCode").toString();
+				List<?> hallCodes = (List<?>) hallCodeObj;
 
-	            if (hallCode.equals(mdmsHallCode)) {
+				for (Object obj : hallCodes) {
 
-	                floors = (List<Map<String, Object>>) hall.get("floors");
+					if (obj instanceof Map) {
 
-	                return floors;
-	            }
-	        }
+						Map<String, Object> hall = (Map<String, Object>) obj;
 
-	    } catch (Exception e) {
-	        log.error("Error while reading floors from MDMS", e);
-	    }
+						if (hallCode.equals(hall.get("HallCode"))) {
 
-	    return floors;
+							floors = (List<Map<String, Object>>) hall.get("floors");
+
+							return floors;
+						}
+
+					}
+				}
+			}
+
+		} catch (Exception e) {
+			log.error("Error while reading floors from MDMS", e);
+		}
+
+		return floors;
 	}
-
 	@Override
 	public CommunityHallSlotAvailabilityResponse getCommunityHallSlotAvailability(
 			CommunityHallSlotSearchCriteria criteria, RequestInfo info) {
+		if (criteria.getTenantId() == null || !criteria.getTenantId().startsWith("pg.")) {
+        	throw new CustomException("INVALID_TENANT", "Invalid tenantId provided");
+    	}
 		if (criteria.getCommunityHallCode() == null && CollectionUtils.isEmpty(criteria.getHallCodes())) {
 			throw new CustomException("INVALID_HALL_CODE", "Invalid hall code provided for slot search");
 		}
@@ -472,6 +481,7 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
     floors.forEach(floor -> {
 
         String floorCode = floor.get("floorId").toString();
+		String floorName = floor.get("floorName").toString();
 
         List<Map<String, Object>> timeSlots =
                 (List<Map<String, Object>>) floor.get("timeSlots");
@@ -487,6 +497,7 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
                             date,
                             hallCode,
                             floorCode,
+							floorName,
                             fromTime,
                             toTime
                     ));
@@ -513,6 +524,7 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
         LocalDate date,
         String hallCode,
         String floorCode,
+		String floorName,
         String fromTime,
         String toTime) {
 
@@ -521,6 +533,7 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
             .communityHallCode(criteria.getCommunityHallCode())
             .hallCode(hallCode)
 			.floorId(floorCode)
+			.floorName(floorName)
             .bookingDate(
                     CommunityHallBookingUtil.parseLocalDateToString(
                             date,

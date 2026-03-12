@@ -40,6 +40,10 @@ public class BookingSlotDetail {
 	@NotBlank
 	@JsonProperty("floorCode")
 	private String floorCode;
+
+	@NotBlank
+	@JsonProperty("floorName")
+	private String floorName;
 	
 	@NotBlank
 	private String capacity;
