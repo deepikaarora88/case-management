@@ -355,7 +355,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 	@Override
 	public CommunityHallSlotAvailabilityResponse getCommunityHallSlotAvailability(
 			CommunityHallSlotSearchCriteria criteria, RequestInfo info) {
-		if (criteria.getTenantId() == null || !criteria.getTenantId().startsWith("pg.")) {
+		if (criteria.getTenantId() == null || !criteria.getTenantId().startsWith("od.")) {
         	throw new CustomException("INVALID_TENANT", "Invalid tenantId provided");
     	}
 		if (criteria.getCommunityHallCode() == null && CollectionUtils.isEmpty(criteria.getHallCodes())) {
