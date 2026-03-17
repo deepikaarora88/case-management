@@ -119,7 +119,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 		enrichmentService.enrichCreateBookingRequest(communityHallsBookingRequest);
 		
 		//ENcrypt PII data of applicant
-		encryptionService.encryptObject(communityHallsBookingRequest);
+		//encryptionService.encryptObject(communityHallsBookingRequest);
 
 		/**
 		 * Workflow will come into picture once hall location changes or booking is
@@ -355,7 +355,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 	@Override
 	public CommunityHallSlotAvailabilityResponse getCommunityHallSlotAvailability(
 			CommunityHallSlotSearchCriteria criteria, RequestInfo info) {
-		if (criteria.getTenantId() == null || !criteria.getTenantId().startsWith("od.")) {
+		if (criteria.getTenantId() == null || !criteria.getTenantId().startsWith("od")) {
         	throw new CustomException("INVALID_TENANT", "Invalid tenantId provided");
     	}
 		if (criteria.getCommunityHallCode() == null && CollectionUtils.isEmpty(criteria.getHallCodes())) {
