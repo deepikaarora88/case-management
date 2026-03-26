@@ -480,7 +480,7 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 
     floors.forEach(floor -> {
 
-        String floorCode = floor.get("floorId").toString();
+        String floorCode = floor.get("floorCode").toString();
 		String floorName = floor.get("floorName").toString();
 
         List<Map<String, Object>> timeSlots =
@@ -532,7 +532,7 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
             CommunityHallSlotAvailabilityDetail.builder()
             .communityHallCode(criteria.getCommunityHallCode())
             .hallCode(hallCode)
-			.floorId(floorCode)
+			.floorCode(floorCode)
 			.floorName(floorName)
             .bookingDate(
                     CommunityHallBookingUtil.parseLocalDateToString(

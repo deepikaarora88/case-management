@@ -31,7 +31,7 @@ import lombok.ToString;
     "tenantId",
     "hallCode",
     "communityHallCode",
-    "floorId",
+    "floorCode",
     "bookingDate",
     "fromTime",
     "toTime"
@@ -42,7 +42,7 @@ public class CommunityHallSlotAvailabilityDetail {
 	
 	private String hallCode;
 
-	private String floorId;
+	private String floorCode;
 
 	private String floorName;
 	
