@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -335,7 +336,7 @@ public class CommunityHallBookingServiceImpl implements CommunityHallBookingServ
 
 						Map<String, Object> hall = (Map<String, Object>) obj;
 
-						if (hallCode.equals(hall.get("HallCode"))) {
+						if (hallCode.trim().equalsIgnoreCase(hall.get("HallCode").toString().trim())) {
 
 							floors = (List<Map<String, Object>>) hall.get("floors");
 
@@ -510,13 +511,28 @@ private List<CommunityHallSlotAvailabilityDetail> checkTimerTableForAvailaibilit
 		});
 
 		//Setting hall status to booked if it is already booked by checking in the database entry
-		availabiltityDetailsList.stream().forEach(detail -> {
-			if (availabiltityDetails.contains(detail)) {
+		Set<String> bookedSet = availabiltityDetails.stream()
+				.map((CommunityHallSlotAvailabilityDetail d) -> d.getHallCode() + "_" + d.getFloorCode() + "_"
+						+ d.getBookingDate() + "_" + normalizeTime(d.getFromTime()) + "_"
+						+ normalizeTime(d.getToTime()))
+				.collect(Collectors.toSet());
+
+		availabiltityDetailsList.forEach(detail -> {
+
+			String key = detail.getHallCode() + "_" + detail.getFloorCode() + "_" + detail.getBookingDate() + "_"
+					+ normalizeTime(detail.getFromTime()) + "_" + normalizeTime(detail.getToTime());
+
+			if (bookedSet.contains(key)) {
 				detail.setSlotStaus(BookingStatusEnum.BOOKED.toString());
 			}
 		});
 		
 		return availabiltityDetailsList;
+	}
+
+	private String normalizeTime(String toTime) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private CommunityHallSlotAvailabilityDetail createCommunityHallSlotAvailabiltityDetail(
